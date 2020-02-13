@@ -17,11 +17,18 @@ class WebSocketServer extends WebSocketServerBase {
 
     public function afterClientError($afterClientError){ 
         $this->afterClientError = $afterClientError;
+        $this->socketServer->afterClientError(function($clientUid, $code, $mesage) { // client cause error
+            $server = $this;
+            if (isset($this->afterClientError) && is_callable($this->afterClientError)) {
+                call_user_func_array($this->afterClientError, [$this, $clientUid, $code, $mesage]);
+            }
+        });        
         return $this;
     }
     
     public function afterServerError($afterServerError){ 
         $this->afterServerError = $afterServerError;
+        $this->socketServer->afterServerError($this->afterServerError);
         return $this;
     }
     
@@ -72,15 +79,18 @@ class WebSocketServer extends WebSocketServerBase {
     
     public function afterShutdown($afterShutdownEvent = null) {
         $this->afterShutdownEvent = $afterShutdownEvent;
+        $this->socketServer->afterShutdown(function($server) { // client cause error            
+            if (isset($this->afterShutdownEvent) && is_callable($this->afterShutdownEvent)) {
+                 call_user_func_array($this->afterShutdownEvent, [$this]);
+            }
+        });
         return $this;
     }
     
     public function shutdown() {
        $this->socketServer->shutdown();
     }
-    
-    
-    
+
     public function addAction($name, $action) {
          $this->actions[$name] = $action;
     }
@@ -114,21 +124,8 @@ class WebSocketServer extends WebSocketServerBase {
          
     }
     
-    public function listen() {
-       
-        $this->socketServer
-        ->afterServerError($this->afterServerError) // server cause error
-        ->afterClientError(function($clientUid, $code, $mesage) { // client cause error
-            $server = $this;
-            if (isset($this->afterClientError) && is_callable($this->afterClientError)) {
-                call_user_func_array($this->afterClientError, [$this, $clientUid, $code, $mesage]);
-            }
-        })
-        ->afterShutdown(function($server) { // client cause error            
-            if (isset($this->afterShutdownEvent) && is_callable($this->afterShutdownEvent)) {
-                 call_user_func_array($this->afterShutdownEvent, [$this]);
-            }
-        })
+    public function listenBody() {
+        $this->socketServer        
         ->acceptClient(function ($clientUid, $data) { // client connected
             $headers = $this->createConnectHeader($data);
             
@@ -159,7 +156,7 @@ class WebSocketServer extends WebSocketServerBase {
                 $message =  call_user_func_array($this->buildPing, [$server, $clientUid]);
             }
         })
-        ->listenToSocket(
+        ->addListener(
             function ($clientUid, $data) { // client send request
                 $lastFrame  = null;
                 if (isset($this->frames[$clientUid]) && $this->frames[$clientUid] != null) { // ceck for unfinished frame
@@ -235,5 +232,11 @@ class WebSocketServer extends WebSocketServerBase {
                 }
             }
         );
+        
+        return $this;
+    }
+    
+    public function listen() {
+        $this->listenBody()->socketServer->listen();
     }
 }

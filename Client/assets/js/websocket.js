@@ -11,8 +11,6 @@ var websocket = {
     
     createConnection: function() {
         this.conn = new WebSocket('ws://127.0.0.1:8080');
-        //this.conn = new WebSocket('wss://socket.pekand.doc:8080');
-        //this.conn = new WebSocket('wss://socket.pekand.com:8080');
         this.conn.onopen = this.connectionOpen.bind(this);
         this.conn.onclose = this.connectionClose.bind(this);
         this.conn.onerror = this.connectionError.bind(this);

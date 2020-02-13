@@ -40,7 +40,6 @@ class Storage
     }
 
 	public function openAll() {
-		$files = array();
 		foreach (glob($this->storagePath.DIRECTORY_SEPARATOR."*.json") as $file) {
 		  $name = pathinfo($file, PATHINFO_FILENAME);
 		  $data[$name] = $this->open($name);

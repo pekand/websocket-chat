@@ -6,7 +6,6 @@ spl_autoload_register(function ($class_name) {
     require_once dirname(__FILE__).DIRECTORY_SEPARATOR.str_replace("\\", "/", $class_name) . '.php';
 });
 
-
 use WebSocketServer\WebSocketServer;
 use Logic\Log;
 use Logic\ChatsStorage;
