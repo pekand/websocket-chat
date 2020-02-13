@@ -3,13 +3,17 @@
 set_time_limit(0);
 
 spl_autoload_register(function ($class_name) {
-    require_once dirname(__FILE__)."/".str_replace("\\", "/", $class_name) . '.php';
+    require_once dirname(__FILE__).DIRECTORY_SEPARATOR.str_replace("\\", "/", $class_name) . '.php';
 });
+
 
 use WebSocketServer\WebSocketServer;
 use Logic\Log;
 use Logic\ChatsStorage;
 use Logic\ServerLogic;
+
+define("ROOT", dirname(__FILE__));
+define("STORAGE", ROOT.DIRECTORY_SEPARATOR.'storage');
 
 Log::setAllowdSeverity([
     'INFO', 
@@ -160,7 +164,10 @@ $server->addAction('close', function($server, $clientUid, $data){
 $server->addAction('login', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client attempt login as operator");
     
-    if($data['token'] == 'password') { 
+    
+    $userStorage = ServerLogic::getUsersStorage();
+
+    if($userStorage->isValidUser($data['username'], $data['password'])) { 
         Log::write("({$clientUid}) Operator accepted");
             
         $noActiveOperator = true;

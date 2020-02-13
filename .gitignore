@@ -1,3 +1,4 @@
 storage/chats/*
 storage/log/*
 storage/tokens/*
+storage/users/*

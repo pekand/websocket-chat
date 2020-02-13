@@ -13,6 +13,7 @@ class ServerLogic
     static $tokens = [];
  
     static $chatsStorage = null;
+    static $usersStorage = null;
     
     public static function init()
     {
@@ -26,6 +27,15 @@ class ServerLogic
         }
         
         return self::$chatsStorage;
+    }
+    
+    public static function getUsersStorage()
+    {
+        if (self::$usersStorage == null){
+            self::$usersStorage = new UsersStorage(STORAGE, 'users');
+        }
+        
+        return self::$usersStorage;
     }
     
     public static function isOperator($clientUid)

@@ -27,7 +27,7 @@ var app = {
     },
     
     loginToChat: function(username, password) {
-        this.connection.sendMessage({action:'login', username: username, token: password});
+        this.connection.sendMessage({action:'login', username: username, password: password});
     },
     
     connectionCreated: function() {       
