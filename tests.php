@@ -13,6 +13,6 @@ if (isset($argv[1]) && $argv[1]=='chats') {
 } else {
 	echo "Available parameters:\n";
 	echo "messages - test messaging functionality\n";
-	echo "messages - test chat functionality\n";
+	echo "chats - test chat functionality\n";
 }
 

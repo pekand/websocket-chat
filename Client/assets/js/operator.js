@@ -15,6 +15,8 @@ var app = {
 
     bindComponents: function(){
         this.chatsContainer = document.getElementById('chats');
+        this.loginPage = document.getElementById('login-page');
+        this.chatsPage = document.getElementById('chats-page');
         this.loginBox = loginBox('login');
     },
 
@@ -37,6 +39,8 @@ var app = {
         var operatorToken =  localStorage.getItem('operatorToken') || null;
         if(operatorToken !== null){
             this.connection.sendMessage({action:'loginWithToken', token: operatorToken});            
+        } else {
+            this.showLoginPage();
         }
     },
     
@@ -48,14 +52,20 @@ var app = {
         if(data.action == "loginSuccess"){
             localStorage.setItem('operatorToken', data.token);
             this.logged = true;
-            this.loginBox.hide();
             this.connection.sendMessage({action:'getAllOpenChats'});
+        }
+        
+        if(data.action == "loginFailed"){
+            this.loginBox.shake();
         }
         
         if(data.action == "loginWithTokenSuccess"){
             this.logged = true;
-            this.loginBox.hide();
             this.connection.sendMessage({action:'getAllOpenChats'});
+        }
+        
+        if(data.action == "loginWithTokenFailed"){
+            this.showLoginPage();
         }
         
         if(data.action == "allOpenChats") {
@@ -67,6 +77,7 @@ var app = {
             }
             
             this.showChatContainer();
+            this.showChatsPage();
         }
         
         if(data.action == "chatHistory"){
@@ -134,6 +145,22 @@ var app = {
     
     hideChatContainer:function (){
         this.chatsContainer.style.display = 'none';
+    },
+    
+    
+    hidePages:function (){
+        this.loginPage.style.display = 'none';
+        this.chatsPage.style.display = 'none';
+    },
+    
+    showLoginPage:function (){
+        this.hidePages();
+        this.loginPage.style.display = 'block';
+    },
+    
+    showChatsPage:function (){
+      this.hidePages();  
+      this.chatsPage.style.display = 'block';
     },
     
     el: function(html) {

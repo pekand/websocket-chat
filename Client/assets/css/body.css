@@ -1,15 +1,29 @@
- body {
-    
+* {
+	font-family:sans-serif;
 }
 
-.background {
-	background: rgb(2,0,36);
+body {
+    background: rgb(2,0,36);
     background: linear-gradient(90deg, rgba(22,121,9,0.8491771708683473) 0%, rgba(2,87,15,1) 0%, rgba(19,135,46,1) 3%, rgba(0,212,255,1) 100%);
 }
 
-.wrap {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.hide {
+	display: none;
 }
+
+.center {
+    width: 10%;
+    height: 10%;
+    margin: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: 999;
+}
+
+.page{
+	display: none;
+}
+ 

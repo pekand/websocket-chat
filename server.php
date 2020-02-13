@@ -224,7 +224,9 @@ $server->addAction('loginWithToken', function($server, $clientUid, $data){
         }    
     } else {
         Log::write("({$clientUid}) Operator rejected token");
-        $server->sendMessage($clientUid, json_encode(['action'=>'loginWithTokenFailed']));   
+        $server->sendMessage($clientUid, json_encode([
+            'action'=>'loginWithTokenFailed'
+        ]));   
     }
 });
 
