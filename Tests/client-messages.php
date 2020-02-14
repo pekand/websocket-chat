@@ -357,9 +357,9 @@ $pool->addAction(2000000, function(){
     global $state;
     global $client1;
     
-    $client1->sendMessage(json_encode(['action'=>'login','token'=>'wrong_pasword']));
+    $client1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'wrong_pasword']));
     $client1->sendMessage(json_encode(['action'=>'logout']));
-    $client1->sendMessage(json_encode(['action'=>'login','token'=>'password']));
+    $client1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
     $client1->sendMessage(json_encode(['action'=>'logout']));
     $client1->sendMessage(json_encode(['action'=>'isOperatorLogged']));
     //$client->sendMessage(json_encode(['action'=>'shutdown']));
@@ -372,7 +372,7 @@ $pool->addAction(3000000, function(){
     global $state;
     global $client1;
     
-    $client1->sendMessage(json_encode(['action'=>'login','token'=>'password']));
+    $client1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
     $client1->sendMessage(json_encode(['action'=>'logout']));
 });
 
@@ -405,7 +405,7 @@ $pool->addAction(6000000, function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode(['action'=>'login','token'=>'password']));
+    $operator1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
 });
 
 $pool->addAction(7000000, function(){
@@ -471,7 +471,7 @@ $pool->addAction(12000000, function(){
     global $state;
     global $operator2;
 
-    $operator2->sendMessage(json_encode(['action'=>'login','token'=>'password']));
+    $operator2->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
 });
 
 $pool->addAction(13000000, function(){    

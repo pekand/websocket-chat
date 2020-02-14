@@ -15,6 +15,8 @@ use Logic\Validator;
 define("ROOT", dirname(__FILE__));
 define("STORAGE", ROOT.DIRECTORY_SEPARATOR.'storage');
 
+ServerLogic::init();
+
 Log::setAllowdSeverity([
     'INFO', 
     'ERROR', 
@@ -23,13 +25,11 @@ Log::setAllowdSeverity([
 
 Log::write("WEBSOCKET SERVER START");
 
-ServerLogic::init();
-
 $server = new WebSocketServer([
     'port' => 8080
 ]);
 
-$server->afterServerError(function($code, $message) {
+$server->afterServerError(function($server, $code, $message) {
      Log::write("SERVER ERROR [$code]: $message", "ERROR");
 });
 
@@ -97,7 +97,7 @@ $server->addAction('ping', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));
          return;  
     }
     
@@ -113,7 +113,7 @@ $server->addAction('getUid', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
      
@@ -131,7 +131,7 @@ $server->addAction('shutdown', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -147,7 +147,7 @@ $server->addAction('close', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -215,7 +215,7 @@ $server->addAction('login', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -264,7 +264,7 @@ $server->addAction('loginWithToken', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -311,7 +311,7 @@ $server->addAction('logout', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -340,7 +340,7 @@ $server->addAction('isOperatorLogged', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -364,7 +364,7 @@ $server->addAction('sendMessage', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -385,7 +385,7 @@ $server->addAction('sendMessageToOperator', function($server, $clientUid, $data)
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -404,7 +404,7 @@ $server->addAction('getClients', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -430,7 +430,7 @@ $server->addAction('broadcast', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -453,11 +453,13 @@ $server->addAction('openChat', function($server, $clientUid, $data){
     $validator = new Validator();
     $validator->rules([
         'action' => [],
-        'chatUid' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],
+        'chatUid' => ['null'=>true, 'type'=>'string', 'length' => ['min'=>0,'max'=>100],],
     ]);
     
+    
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+        var_dump($validator->getErrors());die();
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));
          return;  
     }
     
@@ -505,7 +507,7 @@ $server->addAction('getAllOpenChats', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
      
@@ -529,7 +531,7 @@ $server->addAction('getChatHistory', function($server, $clientUid, $data) {
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -557,7 +559,7 @@ $server->addAction('addClientMessageToChat', function($server, $clientUid, $data
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     
@@ -605,7 +607,7 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
          return;  
     }
     

@@ -245,7 +245,11 @@ $pool->addAction(['delay'=>2000000], function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode(['action'=>'login','token'=>'password']));
+    $operator1->sendMessage(json_encode([
+        'action'=>'login',
+        'username'=>'admin',
+        'password'=>'password',
+    ]));
 });
 
 $pool->addAction(['delay'=>3000000], function(){
@@ -265,7 +269,7 @@ $pool->addAction(['delay'=>4000000], function(){
 
     $client1->sendMessage(json_encode([
         'action'=>'addClientMessageToChat',
-        'chatUid'=>$state['client1']['chatUid'],
+        'chatUid'=>$state['client1']['chatUid'] ?? null,
         'message'=>'message1'
     ]));
 });
@@ -278,7 +282,7 @@ $pool->addAction(['delay'=>5000000], function(){
 
     $operator1->sendMessage(json_encode([
         'action'=>'addOperatorMessageToChat',
-        'chatUid'=>$state['client1']['chatUid'],
+        'chatUid'=>$state['client1']['chatUid'] ?? null,
         'message'=>'message2'
     ]));
 });
@@ -289,7 +293,7 @@ $pool->addAction(['delay'=>6000000], function(){
     global $state;
     global $client2;
     
-    $client2->sendMessage(json_encode(['action'=>'openChat', 'chatUid'=> $state['client1']['chatUid']]));
+    $client2->sendMessage(json_encode(['action'=>'openChat', 'chatUid'=> $state['client1']['chatUid'] ?? null]));
 });
 
 $pool->addAction(['delay'=>7000000], function(){
@@ -300,7 +304,7 @@ $pool->addAction(['delay'=>7000000], function(){
     
      $client2->sendMessage(json_encode([
         'action'=>'addClientMessageToChat',
-        'chatUid'=>$state['client1']['chatUid'],
+        'chatUid'=>$state['client1']['chatUid']??null,
         'message'=>'message3'
     ]));
 });
@@ -313,7 +317,7 @@ $pool->addAction(['delay'=>8000000], function(){
     
      $operator1->sendMessage(json_encode([
         'action'=>'addOperatorMessageToChat',
-        'chatUid'=>$state['client1']['chatUid'],
+        'chatUid'=>$state['client1']['chatUid'] ?? null,
         'message'=>'message4'
     ]));
 });
@@ -326,7 +330,7 @@ $pool->addAction(['delay'=>9000000], function(){
     
      $operator1->sendMessage(json_encode([
         'action'=>'getChatHistory',
-        'chatUid'=>$state['client1']['chatUid']
+        'chatUid'=>$state['client1']['chatUid'] ?? null
     ]));
 });
 
@@ -356,7 +360,11 @@ $pool->addAction(['delay'=>12000000], function(){
     global $state;
     global $operator2;
 
-    $operator2->sendMessage(json_encode(['action'=>'login','token'=>'password']));
+    $operator2->sendMessage(json_encode([
+        'action'=>'login',
+        'username'=>'admin',
+        'password'=>'password'
+    ]));
 });
 
 $pool->addAction(['delay'=>13000000], function(){

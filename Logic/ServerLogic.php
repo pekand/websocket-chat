@@ -18,6 +18,26 @@ class ServerLogic
     public static function init()
     {
         self::loadTokens();
+        
+        if (!file_exists(STORAGE)) {
+            mkdir(STORAGE, 0777, true);
+        }
+        
+        if (!file_exists(STORAGE.DIRECTORY_SEPARATOR.'log')) {
+            mkdir(STORAGE.DIRECTORY_SEPARATOR.'log', 0777, true);
+        }
+        
+        if (!file_exists(STORAGE.DIRECTORY_SEPARATOR.'users')) {
+            mkdir(STORAGE.DIRECTORY_SEPARATOR.'users', 0777, true);
+        }
+        
+        if (!file_exists(STORAGE.DIRECTORY_SEPARATOR.'tokens')) {
+            mkdir(STORAGE.DIRECTORY_SEPARATOR.'tokens', 0777, true);
+        }
+        
+        if (!file_exists(STORAGE.DIRECTORY_SEPARATOR.'chats')) {
+            mkdir(STORAGE.DIRECTORY_SEPARATOR.'chats', 0777, true);
+        }
     }
     
     public static function getChatStorage()
