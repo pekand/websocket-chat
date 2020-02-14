@@ -53,4 +53,8 @@ class UsersStorage
     	
     	return false;
     }
+    
+    public function getUsers() {    
+        return $this->users;
+    }
 }

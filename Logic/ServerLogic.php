@@ -130,4 +130,19 @@ class ServerLogic
         
        self::$tokens = json_decode(file_get_contents(self::$tokensPath), true);       
     }
+    
+    public static function getInfo()
+    {
+        $userStorage = ServerLogic::getUsersStorage();
+        $chatStorage = ServerLogic::getChatStorage();
+        
+        return [
+            'memoryUsage' => round(memory_get_usage(true)/1048576,2)." megabytes",
+            'clientsCount' => count(self::$clients),
+            'operatorsCount' => count(self::$operators),
+            'tokensCount' => count(self::$tokens),
+            'usersCount' => count($userStorage->getUsers()),
+            'chatsCount' => count($chatStorage->getChats()),
+        ];
+    }
 }

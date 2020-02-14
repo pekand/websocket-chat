@@ -131,6 +131,15 @@ class WebSocketServer extends WebSocketServerBase {
          
     }
     
+    public function addWorker($params, $workerCallBack) {
+        $server = $this;
+        $this->socketServer->addWorker($params, function($socketServer) use ($server, $workerCallBack){
+            if (is_callable($workerCallBack)) {
+                call_user_func_array($workerCallBack, [$server]);
+            }
+        });
+    }
+    
     public function listenBody() {
         $this->socketServer        
         ->clientConnected(function ($server, $clientUid, $data) { // client connected
@@ -235,6 +244,7 @@ class WebSocketServer extends WebSocketServerBase {
     }
     
     public function listen() {
-        $this->listenBody()->socketServer->listen();
+        $this->listenBody();
+        $this->socketServer->listen();
     }
 }

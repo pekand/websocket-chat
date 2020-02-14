@@ -21,6 +21,7 @@ class SocketServer {
     private $socket = null;
     private $listeners = [];
     private $clients = [];
+    private $worker = [];
 
     public function __construct($options = []) {
         
@@ -176,7 +177,62 @@ class SocketServer {
         return $this;
     }
     
-    public function listenBody($readFromClientEvent = null) {
+    public function addWorker($params, $workerCallBack) {
+        
+        $delay = 0;
+        if(isset($params['delay'])){
+            $delay = $params['delay'] + 0;
+        }
+        
+        $repeat = false;
+        if(isset($params['repeat'])){
+            $repeat = $params['repeat'] + 0;
+        }
+        
+        $worker = [
+            'executed' => false,
+            'delay' => $delay,
+            'repeat' => $repeat,
+            'nextExecutionAt' => microtime(true)+$delay,
+            'callbeack' => $workerCallBack
+        ];
+
+        $this->workers[] = $worker;
+         
+        return $this;
+    }
+    
+    public function initWorkers() {
+        foreach ($this->workers as &$worker) {
+            $worker['nextExecutionAt'] = microtime(true)+$worker['delay'];
+        }
+    }
+    
+    public function executeWorkers() {
+        $workersForRemove = [];
+        foreach ($this->workers as $key => &$worker) {
+            if($worker['executed'] === false && $worker['nextExecutionAt']<microtime(true)){
+                if(is_callable($worker['callbeack'])){
+                    call_user_func_array($worker['callbeack'], [$this]);
+                }
+                
+                if($worker['repeat']!==false && $worker['repeat'] > 0) {
+                    $worker['nextExecutionAt'] = microtime(true)+$worker['repeat'];
+                } else {
+                    $worker['executed'] = true;
+                    $workersForRemove[] = $key;
+                }
+            }
+        }
+        
+        if(count($workersForRemove)>0){
+            foreach ($workersForRemove as $key) {
+                unset($this->workers[$key]);
+            }
+        }
+    }
+
+    public function listenBody() {
         if(false !== ($ref = @socket_accept($this->socket))) {
             
             if ($this->options['maxClientsCount'] != 0 && count($this->clients) >= $this->options['maxClientsCount']) {
@@ -351,10 +407,6 @@ class SocketServer {
                 }
 
                 $this->clients[$clientUid]['requestCount']++;
-
-                if (is_callable($readFromClientEvent)) {
-                    
-                }
                 
                 foreach ($this->listeners as $listener) {
                     if (is_callable($listener)) {
@@ -373,13 +425,15 @@ class SocketServer {
     
     public function listen() {
         
-        $this->connect();        
+        $this->connect();    
+        $this->initWorkers();
         
         $this->listening = true;
         
         while($this->listening)
         {
             $this->listenBody();
+            $this->executeWorkers();
             usleep($this->options['waitInterval']);
         }
         

@@ -638,6 +638,11 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
     }
 });
 
+$server->addWorker(['delay'=>10.0, 'repeat'=>60.0], function($server){
+    Log::write("Worker informations: ".json_encode(ServerLogic::getInfo()));   
+});
+
+
 $server->listen();
 
 Log::write("WEBSOCKET SERVER FINISHED");
