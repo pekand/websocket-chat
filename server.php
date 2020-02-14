@@ -10,6 +10,7 @@ use WebSocketServer\WebSocketServer;
 use Logic\Log;
 use Logic\ChatsStorage;
 use Logic\ServerLogic;
+use Logic\Validator;
 
 define("ROOT", dirname(__FILE__));
 define("STORAGE", ROOT.DIRECTORY_SEPARATOR.'storage');
@@ -89,11 +90,33 @@ $server->addListener(function($server, $clientUid, $request) {
 /* TOOLS */
 
 $server->addAction('ping', function($server, $clientUid, $data){
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     $server->sendMessage($clientUid, json_encode(['action'=>'pong']));      
 });
 
 $server->addAction('getUid', function($server, $clientUid, $data){
-    Log::write("({$clientUid}) Request Uid");
+    Log::write("({$clientUid}) Request Uid");   
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+     
     $server->sendMessage($clientUid, json_encode(['action'=>'uid', 'uid'=>$clientUid]));    
 });
 
@@ -101,11 +124,32 @@ $server->addAction('getUid', function($server, $clientUid, $data){
 
 $server->addAction('shutdown', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Request server shutdown");
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     $server->shutdown();
 });
 
 $server->addAction('close', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client call close action on self");
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
     
     $chatStorage = ServerLogic::getChatStorage();
     
@@ -163,6 +207,17 @@ $server->addAction('close', function($server, $clientUid, $data){
 $server->addAction('login', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client attempt login as operator");
     
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+        'username' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],
+        'password' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
     
     $userStorage = ServerLogic::getUsersStorage();
 
@@ -202,6 +257,17 @@ $server->addAction('login', function($server, $clientUid, $data){
 $server->addAction('loginWithToken', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client attempt login with token as operator");
     
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+        'token' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     if(ServerLogic::isValidToken($data['token'])) { 
         Log::write("({$clientUid}) Operator accepted by token");
             
@@ -238,6 +304,17 @@ $server->addAction('loginWithToken', function($server, $clientUid, $data){
 
 $server->addAction('logout', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client attempt logout as operator");
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     if(ServerLogic::isOperator($clientUid)) { 
         Log::write("({$clientUid}) Operator logout operator");
         ServerLogic::removeOperator($clientUid);
@@ -256,6 +333,17 @@ $server->addAction('logout', function($server, $clientUid, $data){
 
 $server->addAction('isOperatorLogged', function($server, $clientUid, $data){   
     Log::write("({$clientUid}) Check if operator is logged");
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     if(count(ServerLogic::getOperators()) == 0) {
         $server->sendMessage($clientUid , json_encode(['action'=>'operatorConnected'])); 
     } else {
@@ -267,6 +355,19 @@ $server->addAction('isOperatorLogged', function($server, $clientUid, $data){
 
 $server->addAction('sendMessage', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client send message to: ".$data['to']." message".$data['message']);
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+        'to' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],
+        'message' => ['type'=>'string', 'length' => ['min'=>1,'max'=>10000],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     $toUid = $data['to'];
     if($server->isClient($toUid)){        
         Log::write("({$clientUid}) Message to {$toUid} : {$data['message']}");
@@ -276,6 +377,18 @@ $server->addAction('sendMessage', function($server, $clientUid, $data){
 
 $server->addAction('sendMessageToOperator', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client send message to all active operators: message".$data['message']);
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+        'message' => ['type'=>'string', 'length' => ['min'=>1,'max'=>10000],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     foreach (ServerLogic::getOperators() as $operatorUid => $value) { 
         Log::write("({$clientUid}) Client Send Message To Operator {$operatorUid}: {$data['message']}");
         $server->sendMessage($operatorUid , json_encode(['action'=>'messageFromClient', 'from'=> $clientUid, 'message'=>$data['message']])); 
@@ -284,6 +397,17 @@ $server->addAction('sendMessageToOperator', function($server, $clientUid, $data)
 
 $server->addAction('getClients', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client request list of clients");
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     if(ServerLogic::isOperator($clientUid)) {
         $clients = [];
         foreach (ServerLogic::getClients() as $uid => $value) { 
@@ -297,7 +421,19 @@ $server->addAction('getClients', function($server, $clientUid, $data){
 
 
 $server->addAction('broadcast', function($server, $clientUid, $data){
-    Log::write("({$clientUid}) Client broadcast message");    
+    Log::write("({$clientUid}) Client broadcast message"); 
+       
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+        'message' => ['type'=>'string', 'length' => ['min'=>1,'max'=>10000],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     if(ServerLogic::isOperator($clientUid) && isset($data['message'])) { 
         Log::write("({$clientUid}) Operator broadcast");
         foreach (ServerLogic::getClients() as $uid => $value) {                
@@ -313,6 +449,17 @@ $server->addAction('broadcast', function($server, $clientUid, $data){
 
 $server->addAction('openChat', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client open chat");   
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],
+        'chatUid' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
     
     $chatStorage = ServerLogic::getChatStorage();
         
@@ -350,7 +497,18 @@ $server->addAction('openChat', function($server, $clientUid, $data){
 });
 
 $server->addAction('getAllOpenChats', function($server, $clientUid, $data){
-    Log::write("({$clientUid}) Client request list of opened chats");   
+    Log::write("({$clientUid}) Client request list of opened chats");  
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],        
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+     
     if(ServerLogic::isOperator($clientUid)) {
         $chatStorage = ServerLogic::getChatStorage();
         $chatStorage->addOperatorToAllChats($clientUid);
@@ -363,6 +521,18 @@ $server->addAction('getAllOpenChats', function($server, $clientUid, $data){
 
 $server->addAction('getChatHistory', function($server, $clientUid, $data) {
     Log::write("({$clientUid}) Client request chat history");   
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],      
+        'chatUid' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],  
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     $chatStorage = ServerLogic::getChatStorage();
     $chatHsitory = $chatStorage->getChatHistory($data['chatUid']);
     
@@ -378,6 +548,19 @@ $server->addAction('getChatHistory', function($server, $clientUid, $data) {
 
 $server->addAction('addClientMessageToChat', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Client try add mesage to chatUid: ".$data['chatUid']);   
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],      
+        'chatUid' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],  
+        'message' => ['type'=>'string', 'length' => ['min'=>1,'max'=>10000],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     $chatStorage = ServerLogic::getChatStorage();        
     $chatStorage->addClientMessage($data['chatUid'], $clientUid, $data['message']);
     $chatStorage->saveChat($data['chatUid']);     
@@ -413,6 +596,19 @@ $server->addAction('addClientMessageToChat', function($server, $clientUid, $data
 
 $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $data){
     Log::write("({$clientUid}) Operator try add mesage to chatUid:".$data['chatUid']);   
+    
+    $validator = new Validator();
+    $validator->rules([
+        'action' => [],      
+        'chatUid' => ['type'=>'string', 'length' => ['min'=>1,'max'=>100],],  
+        'message' => ['type'=>'string', 'length' => ['min'=>1,'max'=>10000],],
+    ]);
+    
+    if(!$validator->isValid($data)){
+         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest']));        
+         return;  
+    }
+    
     $chatStorage = ServerLogic::getChatStorage();  
     $chatStorage->addOperatorMessage($data['chatUid'], $clientUid, $data['message']);
     $chatStorage->saveChat($data['chatUid']); 
