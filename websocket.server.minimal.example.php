@@ -35,7 +35,7 @@ $server->clientDisconnected(function($server, $clientUid, $reason) {
 
 //build mesasge witch server use to check if client is live
 $server->buildPing(function($server, $clientUid) {     
-     $server->sendMessage($clientUid, json_encode(['action'=>'ping']));
+     $server->send($clientUid, ['action'=>'ping']);
 });
 
 // catch all messages from server to client
@@ -50,7 +50,7 @@ $server->addListener(function($server, $clientUid, $request) {
 
 // parse request to json and match coresponding action
 $server->addAction('ping', function($server, $clientUid, $data){    
-    $server->sendMessage($clientUid, json_encode(['action'=>'pong']));      
+    $server->send($clientUid, ['action'=>'pong']);      
 });
 
 $server->listen();

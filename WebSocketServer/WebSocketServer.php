@@ -63,6 +63,10 @@ class WebSocketServer extends WebSocketServerBase {
         return $this->socketServer->sendData($clientUid, $this->mesage($message));
     }
     
+     public function send($clientUid, $data){       
+        return $this->sendMessage($clientUid, json_encode($data));
+    }
+    
     public function getClient($clientUid) {      
        return $this->socketServer->getClient($clientUid);
     }

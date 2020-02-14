@@ -14,11 +14,11 @@ $state = [];
 
 $client1->afterConnect(function ($client) {
     echo "C1 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $client1->addAction('ping', function ($client, $data) {   
-    $client->sendMessage(json_encode(['action'=>'pong']));          
+    $client->send(['action'=>'pong']);          
 });
 
 $client1->addAction('uid', function ($client, $data) {   
@@ -53,11 +53,11 @@ $client1->addAction('operatorConnected', function ($client, $data) {
 
 $client2->afterConnect(function ($client) {
     echo "C2 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $client2->addAction('ping', function ($client, $data) {   
-    $client->sendMessage(json_encode(['action'=>'pong']));          
+    $client->send(['action'=>'pong']);          
 });
 
 $client2->addAction('uid', function ($client, $data) {   
@@ -92,11 +92,11 @@ $client2->addAction('operatorConnected', function ($client, $data) {
 
 $operator1->afterConnect(function ($client) {
     echo "O1 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $operator1->addAction('ping', function ($client, $data) {    
-    $client->sendMessage(json_encode(['action'=>'pong']));
+    $client->send(['action'=>'pong']);
 });
 
 $operator1->addAction('uid', function ($client, $data) {    
@@ -160,11 +160,11 @@ $operator1->addAction('chatClosed', function ($client, $data) {
 
 $operator2->afterConnect(function ($client) {
     echo "O2 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $operator2->addAction('ping', function ($client, $data) {    
-    $client->sendMessage(json_encode(['action'=>'pong']));
+    $client->send(['action'=>'pong']);
 });
 
 $operator2->addAction('uid', function ($client, $data) {    
@@ -235,7 +235,7 @@ $pool->addAction(['delay'=>1000000], function(){
     global $state;
     global $client1;
     
-    $client1->sendMessage(json_encode(['action'=>'openChat', 'chatUid'=>'']));
+    $client1->send(['action'=>'openChat', 'chatUid'=>'']);
     
 });
 
@@ -245,11 +245,11 @@ $pool->addAction(['delay'=>2000000], function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode([
+    $operator1->send([
         'action'=>'login',
         'username'=>'admin',
         'password'=>'password',
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>3000000], function(){
@@ -258,7 +258,7 @@ $pool->addAction(['delay'=>3000000], function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode(['action'=>'getAllOpenChats']));
+    $operator1->send(['action'=>'getAllOpenChats']);
 });
 
 $pool->addAction(['delay'=>4000000], function(){
@@ -267,11 +267,11 @@ $pool->addAction(['delay'=>4000000], function(){
     global $state;
     global $client1;
 
-    $client1->sendMessage(json_encode([
+    $client1->send([
         'action'=>'addClientMessageToChat',
         'chatUid'=>$state['client1']['chatUid'] ?? null,
         'message'=>'message1'
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>5000000], function(){
@@ -280,11 +280,11 @@ $pool->addAction(['delay'=>5000000], function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode([
+    $operator1->send([
         'action'=>'addOperatorMessageToChat',
         'chatUid'=>$state['client1']['chatUid'] ?? null,
         'message'=>'message2'
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>6000000], function(){
@@ -293,7 +293,7 @@ $pool->addAction(['delay'=>6000000], function(){
     global $state;
     global $client2;
     
-    $client2->sendMessage(json_encode(['action'=>'openChat', 'chatUid'=> $state['client1']['chatUid'] ?? null]));
+    $client2->send(['action'=>'openChat', 'chatUid'=> $state['client1']['chatUid'] ?? null]);
 });
 
 $pool->addAction(['delay'=>7000000], function(){
@@ -302,11 +302,11 @@ $pool->addAction(['delay'=>7000000], function(){
     global $state;
     global $client2;
     
-     $client2->sendMessage(json_encode([
+     $client2->send([
         'action'=>'addClientMessageToChat',
         'chatUid'=>$state['client1']['chatUid']??null,
         'message'=>'message3'
-    ]));
+    ]);
 });
   
 $pool->addAction(['delay'=>8000000], function(){
@@ -315,11 +315,11 @@ $pool->addAction(['delay'=>8000000], function(){
     global $state;
     global $operator1;
     
-     $operator1->sendMessage(json_encode([
+     $operator1->send([
         'action'=>'addOperatorMessageToChat',
         'chatUid'=>$state['client1']['chatUid'] ?? null,
         'message'=>'message4'
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>9000000], function(){
@@ -328,10 +328,10 @@ $pool->addAction(['delay'=>9000000], function(){
     global $state;
     global $operator1;
     
-     $operator1->sendMessage(json_encode([
+     $operator1->send([
         'action'=>'getChatHistory',
         'chatUid'=>$state['client1']['chatUid'] ?? null
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>10000000], function(){
@@ -339,9 +339,9 @@ $pool->addAction(['delay'=>10000000], function(){
     
     global $client1;
     
-    $client1->sendMessage(json_encode([
+    $client1->send([
         'action'=>'close'
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>11000000], function(){
@@ -349,9 +349,9 @@ $pool->addAction(['delay'=>11000000], function(){
     
     global $operator1;
     
-    $operator1->sendMessage(json_encode([
+    $operator1->send([
         'action'=>'close'
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>12000000], function(){
@@ -360,11 +360,11 @@ $pool->addAction(['delay'=>12000000], function(){
     global $state;
     global $operator2;
 
-    $operator2->sendMessage(json_encode([
+    $operator2->send([
         'action'=>'login',
         'username'=>'admin',
         'password'=>'password'
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>13000000], function(){
@@ -373,7 +373,7 @@ $pool->addAction(['delay'=>13000000], function(){
     global $state;
     global $operator2;
 
-    $operator2->sendMessage(json_encode(['action'=>'getAllOpenChats']));
+    $operator2->send(['action'=>'getAllOpenChats']);
 });
 
 $pool->addAction(['delay'=>14000000], function(){
@@ -381,9 +381,9 @@ $pool->addAction(['delay'=>14000000], function(){
     
     global $client2;
     
-    $client2->sendMessage(json_encode([
+    $client2->send([
         'action'=>'close'
-    ]));
+    ]);
 });
 
 $pool->addAction(['delay'=>15000000, 'repeat'=> 1000000], function(){

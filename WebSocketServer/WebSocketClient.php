@@ -111,6 +111,10 @@ Sec-WebSocket-Extensions: permessage-deflate; client_max_window_bits";
     public function sendMessage($message){                 
         return $this->client->sendData($this->mesage($message, 1, true));
     }
+    
+    public function send($data){                 
+        return $this->sendMessage(json_encode($data));
+    }
 
     public function addAction($name, $action) {
          $this->actions[$name] = $action;

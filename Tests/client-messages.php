@@ -17,7 +17,7 @@ $state = [];
 
 $client1->afterConnect(function ($client) {
     echo "C1 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $client1->addListener(function ($client, $request) {    
@@ -29,7 +29,7 @@ $client1->addListener(function ($client, $request) {
     }
     
     if($data['action'] == 'ping') { 
-        $client->sendMessage(json_encode(['action'=>'pong']));      
+        $client->send(['action'=>'pong']);      
     }
     
     if($data['action'] == 'uid') { 
@@ -79,7 +79,7 @@ $client1->addListener(function ($client, $request) {
 
 $client2->afterConnect(function ($client) {
     echo "C2 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $client2->addListener(function ($client, $request) {
@@ -91,7 +91,7 @@ $client2->addListener(function ($client, $request) {
     }
     
     if($data['action'] == 'ping') { 
-        $client->sendMessage(json_encode(['action'=>'pong']));      
+        $client->send(['action'=>'pong']);      
     }
     
     if($data['action'] == 'uid') { 
@@ -113,7 +113,7 @@ $client2->addListener(function ($client, $request) {
 
 $operator1->afterConnect(function ($client) {
     echo "OP After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $operator1->addListener(function ($client, $request) {
@@ -125,7 +125,7 @@ $operator1->addListener(function ($client, $request) {
     }
     
     if($data['action'] == 'ping') { 
-        $client->sendMessage(json_encode(['action'=>'pong']));      
+        $client->send(['action'=>'pong']);      
     }
     
     if($data['action'] == 'uid') { 
@@ -158,7 +158,6 @@ $operator1->addListener(function ($client, $request) {
     
     if($data['action'] == 'message') { 
         echo "OP1 mesage from (".$data['from']."): ".$data['message']."\n";
-        /*$client->sendMessage(json_encode(['action'=>'close']));*/
     }
 });
 
@@ -166,7 +165,7 @@ $operator1->addListener(function ($client, $request) {
 
 $client3->afterConnect(function ($client) {
     echo "C3 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $client3->addListener(function ($client, $request) {
@@ -178,7 +177,7 @@ $client3->addListener(function ($client, $request) {
     }
     
     if($data['action'] == 'ping') { 
-        $client->sendMessage(json_encode(['action'=>'pong']));      
+        $client->send(['action'=>'pong']);      
     }
     
     if($data['action'] == 'uid') { 
@@ -197,7 +196,7 @@ $client3->addListener(function ($client, $request) {
 
 $client4->afterConnect(function ($client) {
     echo "C4 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $client4->addListener(function ($client, $request) {
@@ -209,7 +208,7 @@ $client4->addListener(function ($client, $request) {
     }
     
     if($data['action'] == 'ping') { 
-        $client->sendMessage(json_encode(['action'=>'pong']));      
+        $client->send(['action'=>'pong']);      
     }
     
     if($data['action'] == 'uid') { 
@@ -229,7 +228,7 @@ $client4->addListener(function ($client, $request) {
 
 $operator2->afterConnect(function ($client) {
     echo "OP2 After connect\n";
-    $client->sendMessage(json_encode(['action'=>'getUid']));
+    $client->send(['action'=>'getUid']);
 });
 
 $operator2->addListener(function ($client, $request) {
@@ -241,7 +240,7 @@ $operator2->addListener(function ($client, $request) {
     }
     
     if($data['action'] == 'ping') { 
-        $client->sendMessage(json_encode(['action'=>'pong']));      
+        $client->send(['action'=>'pong']);      
     }
     
     if($data['action'] == 'uid') { 
@@ -278,76 +277,76 @@ $pool->addAction(1000000, function(){
     global $state;
     global $client1;
     
-    $client1->sendMessage(json_encode(['action'=>'ping']));
+    $client1->send(['action'=>'ping']);
 
-    //$client->sendMessage(json_encode(['action'=>'shutdown']));
+    //$client->send(['action'=>'shutdown']);
   
-   $client1->sendMessage(json_encode([
+   $client1->send([
     'action'=>'sendMessage',
     'to'=>$state['client1']['uid'],
     'message'=>"Mesage from client1 to client1"
-   ]));      
+   ]);      
    
-   $client1->sendMessage(json_encode([
+   $client1->send([
     'action'=>'sendMessage', 
     'to'=> $state['client2']['uid'],
     'message'=>"Mesage from client1 to client2"
-    ])); 
+    ]); 
    
    $longMessage1 = "";
    for($i=0; $i<125-3;$i++){
      $longMessage1 .= "O";
    }
    
-   $client1->sendMessage(json_encode([
+   $client1->send([
     'action'=>'sendMessage', 
     'to'=> $state['client2']['uid'],
     'message'=>"L".$longMessage1."NG"
-    ])); 
+    ]); 
    
    $longMessage2 = "";
    for($i=0; $i<126-3;$i++){
      $longMessage2 .= "O";
    }
    
-   $client1->sendMessage(json_encode([
+   $client1->send([
     'action'=>'sendMessage', 
     'to'=> $state['client2']['uid'],
     'message'=>"L".$longMessage2."NG"
-    ])); 
+    ]); 
    
    $longMessage3 = "";
    for($i=0; $i<127-3;$i++){
      $longMessage3 .= "O";
    }
    
-   $client1->sendMessage(json_encode([
+   $client1->send([
     'action'=>'sendMessage', 
     'to'=> $state['client2']['uid'],
     'message'=>"L".$longMessage3."NG"
-    ])); 
+    ]); 
    
    $longMessage4 = "";
    for($i=0; $i<2**16-3;$i++){
      $longMessage4 .= "O";
    }
    
-   $client1->sendMessage(json_encode([
+   $client1->send([
     'action'=>'sendMessage', 
     'to'=> $state['client2']['uid'],
     'message'=>"L".$longMessage4."NG"
-    ])); 
+    ]); 
    
    $longMessage5 = "";
    for($i=0; $i<2**17-3;$i++){
      $longMessage5 .= "O";
    }
    
-   $client1->sendMessage(json_encode([
+   $client1->send([
     'action'=>'sendMessage', 
     'to'=> $state['client2']['uid'],
     'message'=>"L".$longMessage5."NG"
-    ])); 
+    ]); 
    
 });
 
@@ -357,12 +356,12 @@ $pool->addAction(2000000, function(){
     global $state;
     global $client1;
     
-    $client1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'wrong_pasword']));
-    $client1->sendMessage(json_encode(['action'=>'logout']));
-    $client1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
-    $client1->sendMessage(json_encode(['action'=>'logout']));
-    $client1->sendMessage(json_encode(['action'=>'isOperatorLogged']));
-    //$client->sendMessage(json_encode(['action'=>'shutdown']));
+    $client1->send(['action'=>'login','username'=>'admin', 'password'=>'wrong_pasword']);
+    $client1->send(['action'=>'logout']);
+    $client1->send(['action'=>'login','username'=>'admin', 'password'=>'password']);
+    $client1->send(['action'=>'logout']);
+    $client1->send(['action'=>'isOperatorLogged']);
+    //$client->send(['action'=>'shutdown']);
   
 });
 
@@ -372,8 +371,8 @@ $pool->addAction(3000000, function(){
     global $state;
     global $client1;
     
-    $client1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
-    $client1->sendMessage(json_encode(['action'=>'logout']));
+    $client1->send(['action'=>'login','username'=>'admin', 'password'=>'password']);
+    $client1->send(['action'=>'logout']);
 });
 
 $pool->addAction(4000000, function(){
@@ -382,7 +381,7 @@ $pool->addAction(4000000, function(){
     global $state;
     global $client1;
     
-    $client1->sendMessage(json_encode(['action'=>'isOperatorLogged']));
+    $client1->send(['action'=>'isOperatorLogged']);
 });
 
 $pool->addAction(5000000, function(){
@@ -392,10 +391,10 @@ $pool->addAction(5000000, function(){
     global $client2;
     
     
-    $client2->sendMessage(json_encode([
+    $client2->send([
       'action'=>'sendMessageToOperator',
       'message'=>"message from client2 to all operators",
-    ]));
+    ]);
     
 });
 
@@ -405,7 +404,7 @@ $pool->addAction(6000000, function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
+    $operator1->send(['action'=>'login','username'=>'admin', 'password'=>'password']);
 });
 
 $pool->addAction(7000000, function(){
@@ -414,7 +413,7 @@ $pool->addAction(7000000, function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode(['action'=>'getClients']));
+    $operator1->send(['action'=>'getClients']);
 });
 
 $pool->addAction(8000000, function(){
@@ -423,7 +422,7 @@ $pool->addAction(8000000, function(){
     global $state;
     global $operator1;
 
-    $operator1->sendMessage(json_encode(['action'=>'broadcast', "message"=>"Mesage from operator1 to all clients"]));
+    $operator1->send(['action'=>'broadcast', "message"=>"Mesage from operator1 to all clients"]);
 });
 
 $pool->addAction(9000000, function(){
@@ -432,11 +431,11 @@ $pool->addAction(9000000, function(){
     global $state;
     global $operator1;
        
-    $operator1->sendMessage(json_encode([
+    $operator1->send([
         'action'=>'sendMessage', 
         'to'=> $state['client1']['uid'],
         'message'=>"Mesage from operator1 to client1"
-    ]));
+    ]);
 });
 
 $pool->addAction(10000000, function(){
@@ -446,7 +445,7 @@ $pool->addAction(10000000, function(){
     global $client2;
     
     
-    $client2->sendMessage(json_encode(['action'=>'close'])); // TODO
+    $client2->send(['action'=>'close']); // TODO
     
 });
 
@@ -457,11 +456,11 @@ $pool->addAction(11000000, function(){
     global $client2;
     
     
-    $client2->sendMessage(json_encode([
+    $client2->send([
         'action'=>'sendMessage', 
         'to'=> $state['client1']['uid'],
         'message'=>"Mesage from client2 to client1"
-    ]));
+    ]);
     
 });
 
@@ -471,7 +470,7 @@ $pool->addAction(12000000, function(){
     global $state;
     global $operator2;
 
-    $operator2->sendMessage(json_encode(['action'=>'login','username'=>'admin', 'password'=>'password']));
+    $operator2->send(['action'=>'login','username'=>'admin', 'password'=>'password']);
 });
 
 $pool->addAction(13000000, function(){    
@@ -479,8 +478,8 @@ $pool->addAction(13000000, function(){
     global $operator1;
     global $operator2;
 
-    $operator1->sendMessage(json_encode(['action'=>'close']));
-    $operator2->sendMessage(json_encode(['action'=>'close']));
+    $operator1->send(['action'=>'close']);
+    $operator2->send(['action'=>'close']);
     
 });
 
@@ -489,8 +488,8 @@ $pool->addAction(14000000, function(){
     global $client1;
     global $client3;
 
-    $client1->sendMessage(json_encode(['action'=>'close']));
-    $client3->sendMessage(json_encode(['action'=>'close']));
+    $client1->send(['action'=>'close']);
+    $client3->send(['action'=>'close']);
     
 });
 

@@ -53,7 +53,7 @@ $server->clientDisconnected(function($server, $clientUid, $reason) {
 });
 
 $server->buildPing(function($server, $clientUid) {     
-     $server->sendMessage($clientUid, json_encode(['action'=>'ping']));
+     $server->send($clientUid, ['action'=>'ping']);
 });
 
 $server->beforeSendMessage(function($server, $clientUid, $message) {
@@ -97,11 +97,11 @@ $server->addAction('ping', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);
          return;  
     }
     
-    $server->sendMessage($clientUid, json_encode(['action'=>'pong']));      
+    $server->send($clientUid, ['action'=>'pong']);      
 });
 
 $server->addAction('getUid', function($server, $clientUid, $data){
@@ -113,11 +113,11 @@ $server->addAction('getUid', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
      
-    $server->sendMessage($clientUid, json_encode(['action'=>'uid', 'uid'=>$clientUid]));    
+    $server->send($clientUid, ['action'=>'uid', 'uid'=>$clientUid]);    
 });
 
 /* ACCESS */
@@ -131,7 +131,7 @@ $server->addAction('shutdown', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -147,7 +147,7 @@ $server->addAction('close', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -161,7 +161,7 @@ $server->addAction('close', function($server, $clientUid, $data){
             foreach ($chatsWithoutOperator as $chatUid) { 
                 foreach ($chatStorage->getChatClients() as $client) { 
                     Log::write("({$clientUid}) All operators disconected from chat {$chatUid}");
-                    $server->sendMessage($client , json_encode(['action'=>'operatorsDisconected', 'chatUid'=>$chatUid])); 
+                    $server->send($client , ['action'=>'operatorsDisconected', 'chatUid'=>$chatUid]); 
                 }
             }
         }
@@ -172,7 +172,7 @@ $server->addAction('close', function($server, $clientUid, $data){
         if(count(ServerLogic::getOperators()) == 0 && count(ServerLogic::getClients()) > 0){
             foreach (ServerLogic::getClients() as $uid => $value) { 
                 Log::write("({$clientUid}) All operators disconected, notification to client {$uid}");
-                $server->sendMessage($uid , json_encode(['action'=>'operatorsDisconected'])); 
+                $server->send($uid , ['action'=>'operatorsDisconected']); 
             }
         }
     } else if(ServerLogic::isClient($clientUid)) {
@@ -182,11 +182,11 @@ $server->addAction('close', function($server, $clientUid, $data){
             foreach ($chatsWithoutClients as $chatUid) {
                 foreach (ServerLogic::getOperators() as $operatorUid => $operator) { 
                     Log::write("({$clientUid}) All clients disconected from chat {$chatUid}");
-                    $server->sendMessage($operatorUid , json_encode(['action'=>'allClientsDisconectedFromChat', 'chatUid'=>$chatUid])); 
+                    $server->send($operatorUid , ['action'=>'allClientsDisconectedFromChat', 'chatUid'=>$chatUid]); 
                     
                     $chatStorage->closeChat($chatUid);
                     
-                    $server->sendMessage($operatorUid , json_encode(['action'=>'chatClosed', 'chatUid'=>$chatUid])); 
+                    $server->send($operatorUid , ['action'=>'chatClosed', 'chatUid'=>$chatUid]); 
                 }
             }
         }
@@ -196,7 +196,7 @@ $server->addAction('close', function($server, $clientUid, $data){
         if(count(ServerLogic::getOperators()) > 0){
             foreach (ServerLogic::getOperators() as $uid => $value) { 
                 Log::write("({$clientUid}) Client disconected notification to operator {$uid}");
-                $server->sendMessage($uid , json_encode(['action'=>'clientDisconected', 'clientUid'=> $clientUid])); 
+                $server->send($uid , ['action'=>'clientDisconected', 'clientUid'=> $clientUid]); 
             }
         }
     }
@@ -215,7 +215,7 @@ $server->addAction('login', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -234,23 +234,23 @@ $server->addAction('login', function($server, $clientUid, $data){
         $chatStorage = ServerLogic::getChatStorage();
         $chatStorage->addOperatorToAllChats($clientUid);
         
-        $server->sendMessage($clientUid, json_encode([
+        $server->send($clientUid, [
             'action'=>'loginSuccess',
             'token'=> ServerLogic::getToken()
-        ])); 
+        ]); 
           
         if($noActiveOperator){
             foreach (ServerLogic::getClients() as $uid => $value) { 
                 Log::write("({$clientUid}) Operator login notification {$uid}");
-                $server->sendMessage($uid , json_encode([
+                $server->send($uid , [
                     'action'=>'operatorConnected', 
                     'operatorUid'=> $clientUid                    
-                ])); 
+                ]); 
             }    
         }    
     } else {
         Log::write("({$clientUid}) Operator rejected");
-        $server->sendMessage($clientUid, json_encode(['action'=>'loginFailed']));   
+        $server->send($clientUid, ['action'=>'loginFailed']);   
     }
 });
 
@@ -264,7 +264,7 @@ $server->addAction('loginWithToken', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -281,24 +281,24 @@ $server->addAction('loginWithToken', function($server, $clientUid, $data){
         $chatStorage = ServerLogic::getChatStorage();
         $chatStorage->addOperatorToAllChats($clientUid);
         
-        $server->sendMessage($clientUid, json_encode([
+        $server->send($clientUid, [
             'action'=>'loginWithTokenSuccess'            
-        ])); 
+        ]); 
           
         if($noActiveOperator){
             foreach (ServerLogic::getClients() as $uid => $value) { 
                 Log::write("({$clientUid}) Operator login notification {$uid}");
-                $server->sendMessage($uid , json_encode([
+                $server->send($uid , [
                     'action'=>'operatorConnected', 
                     'operatorUid'=> $clientUid                    
-                ])); 
+                ]); 
             }    
         }    
     } else {
         Log::write("({$clientUid}) Operator rejected token");
-        $server->sendMessage($clientUid, json_encode([
+        $server->send($clientUid, [
             'action'=>'loginWithTokenFailed'
-        ]));   
+        ]);   
     }
 });
 
@@ -311,7 +311,7 @@ $server->addAction('logout', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -319,15 +319,15 @@ $server->addAction('logout', function($server, $clientUid, $data){
         Log::write("({$clientUid}) Operator logout operator");
         ServerLogic::removeOperator($clientUid);
         
-        $server->sendMessage($clientUid, json_encode(['action'=>'logoutSuccess'])); 
+        $server->send($clientUid, ['action'=>'logoutSuccess']); 
         
         foreach (ServerLogic::getOperators() as $operatorUid => $value) { 
             Log::write("({$clientUid}) Operator logout {$operatorUid}");
-            $server->sendMessage($operatorUid , json_encode(['action'=>'operatorLogout', 'operator'=> $clientUid])); 
+            $server->send($operatorUid , ['action'=>'operatorLogout', 'operator'=> $clientUid]); 
         } 
 
     } else {
-        $server->sendMessage($clientUid, json_encode(['action'=>'accessDenied', 'forbidden'=>'logout']));   
+        $server->send($clientUid, ['action'=>'accessDenied', 'forbidden'=>'logout']);   
     }   
 });
 
@@ -340,14 +340,14 @@ $server->addAction('isOperatorLogged', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
     if(count(ServerLogic::getOperators()) == 0) {
-        $server->sendMessage($clientUid , json_encode(['action'=>'operatorConnected'])); 
+        $server->send($clientUid , ['action'=>'operatorConnected']); 
     } else {
-        $server->sendMessage($clientUid , json_encode(['action'=>'operatorsDisconected']));
+        $server->send($clientUid , ['action'=>'operatorsDisconected']);
     }
 });
 
@@ -364,14 +364,14 @@ $server->addAction('sendMessage', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
     $toUid = $data['to'];
     if($server->isClient($toUid)){        
         Log::write("({$clientUid}) Message to {$toUid} : {$data['message']}");
-        $server->sendMessage($toUid, json_encode(['action'=>'message', 'from'=>$clientUid, 'message'=>$data['message'] ]));   
+        $server->send($toUid, ['action'=>'message', 'from'=>$clientUid, 'message'=>$data['message'] ]);   
     }
 });
 
@@ -385,13 +385,13 @@ $server->addAction('sendMessageToOperator', function($server, $clientUid, $data)
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
     foreach (ServerLogic::getOperators() as $operatorUid => $value) { 
         Log::write("({$clientUid}) Client Send Message To Operator {$operatorUid}: {$data['message']}");
-        $server->sendMessage($operatorUid , json_encode(['action'=>'messageFromClient', 'from'=> $clientUid, 'message'=>$data['message']])); 
+        $server->send($operatorUid , ['action'=>'messageFromClient', 'from'=> $clientUid, 'message'=>$data['message']]); 
     }  
 });
 
@@ -404,7 +404,7 @@ $server->addAction('getClients', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -413,9 +413,9 @@ $server->addAction('getClients', function($server, $clientUid, $data){
         foreach (ServerLogic::getClients() as $uid => $value) { 
             $clients[] = $uid;
         }
-        $server->sendMessage($clientUid, json_encode(['action'=>'clients', 'clients'=>$clients]));   
+        $server->send($clientUid, ['action'=>'clients', 'clients'=>$clients]);   
     }  else {
-        $server->sendMessage($clientUid, json_encode(['action'=>'accessDenied', 'forbidden'=>'getClients']));   
+        $server->send($clientUid, ['action'=>'accessDenied', 'forbidden'=>'getClients']);   
     }
 });
 
@@ -430,7 +430,7 @@ $server->addAction('broadcast', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -438,10 +438,10 @@ $server->addAction('broadcast', function($server, $clientUid, $data){
         Log::write("({$clientUid}) Operator broadcast");
         foreach (ServerLogic::getClients() as $uid => $value) {                
             Log::write("({$clientUid}) Addmin broadcast to {$uid}: {$data['message']}");
-            $server->sendMessage($uid, json_encode(['action'=>'operatorBroadcastMessage', 'operator'=>$clientUid, 'message'=>$data['message']])); 
+            $server->send($uid, ['action'=>'operatorBroadcastMessage', 'operator'=>$clientUid, 'message'=>$data['message']]); 
         }
     } else {
-        $server->sendMessage($clientUid, json_encode(['action'=>'accessDenied', 'forbidden'=>'broadcast']));   
+        $server->send($clientUid, ['action'=>'accessDenied', 'forbidden'=>'broadcast']);   
     }   
 });
 
@@ -459,7 +459,7 @@ $server->addAction('openChat', function($server, $clientUid, $data){
     
     if(!$validator->isValid($data)){
         var_dump($validator->getErrors());die();
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);
          return;  
     }
     
@@ -475,26 +475,23 @@ $server->addAction('openChat', function($server, $clientUid, $data){
     if(!$isChatAllreadyOpen) {
         foreach (ServerLogic::getOperators() as $operatorUid => $value) { 
             Log::write("({$clientUid}) Client open chat {$chatUid}");
-            $server->sendMessage($operatorUid , json_encode([
+            $server->send($operatorUid , [
                 'action'=>'chatOpen', 
                 'chatUid'=> $chatUid,
                 'chatHistory' => $chatStorage->getChatHistory($chatUid)
-            ])); 
+            ]); 
         }  
     }
 
     if(!$chatStorage->isClientInChat($data['chatUid'], $clientUid)){
         $chatStorage->addClientToChat($data['chatUid'], $clientUid);
         
-        $server->sendMessage($clientUid, json_encode(
-                [
-                    'action'=>'chatUid', 
-                    'chatUid'=> $chatUid,
-                    'operatorStatus' => count(ServerLogic::getOperators()) > 0 ? 'online' :'offline',
-                    'chatHistory' => $chatStorage->getChatHistory($chatUid)
-                ]
-            )
-        );
+        $server->send($clientUid, [
+            'action'=>'chatUid', 
+            'chatUid'=> $chatUid,
+            'operatorStatus' => count(ServerLogic::getOperators()) > 0 ? 'online' :'offline',
+            'chatHistory' => $chatStorage->getChatHistory($chatUid)
+        ]);
     }
 });
 
@@ -507,16 +504,16 @@ $server->addAction('getAllOpenChats', function($server, $clientUid, $data){
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
      
     if(ServerLogic::isOperator($clientUid)) {
         $chatStorage = ServerLogic::getChatStorage();
         $chatStorage->addOperatorToAllChats($clientUid);
-        $server->sendMessage($clientUid, json_encode(['action'=>'allOpenChats', 'chats'=>$chatStorage->getChats()]));               
+        $server->send($clientUid, ['action'=>'allOpenChats', 'chats'=>$chatStorage->getChats()]);               
     }  else {
-        $server->sendMessage($clientUid, json_encode(['action'=>'accessDenied', 'forbidden'=>'getChats']));   
+        $server->send($clientUid, ['action'=>'accessDenied', 'forbidden'=>'getChats']);   
     }
 });
 
@@ -531,21 +528,18 @@ $server->addAction('getChatHistory', function($server, $clientUid, $data) {
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
     $chatStorage = ServerLogic::getChatStorage();
     $chatHsitory = $chatStorage->getChatHistory($data['chatUid']);
     
-    $server->sendMessage($clientUid, json_encode(
-            [
-                'action'=>'chatHistory', 
-                'chatUid'=> $data['chatUid'],
-                'chatHistory' => $chatHsitory,
-            ]
-        )
-    );  
+    $server->send($clientUid, [
+        'action'=>'chatHistory', 
+        'chatUid'=> $data['chatUid'],
+        'chatHistory' => $chatHsitory,
+    ]);  
 });
 
 $server->addAction('addClientMessageToChat', function($server, $clientUid, $data){
@@ -559,7 +553,7 @@ $server->addAction('addClientMessageToChat', function($server, $clientUid, $data
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -574,12 +568,12 @@ $server->addAction('addClientMessageToChat', function($server, $clientUid, $data
             continue;
         }
 
-        $server->sendMessage($participantUid, json_encode([
+        $server->send($participantUid, [
             'action'=>'clientAddMessageToChat', 
             'chatUid'=>$data['chatUid'], 
             'clientUid'=> $clientUid,
             'message'=>$data['message'],
-        ]));   
+        ]);   
     }   
     
     foreach (ServerLogic::getOperators() as $operatorUid => $operator) {
@@ -587,12 +581,12 @@ $server->addAction('addClientMessageToChat', function($server, $clientUid, $data
             continue;
         }
 
-        $server->sendMessage($operatorUid, json_encode([
+        $server->send($operatorUid, [
             'action'=>'clientAddMessageToChat', 
             'chatUid'=>$data['chatUid'], 
             'clientUid'=> $clientUid,
             'message'=>$data['message'],
-        ]));   
+        ]);   
     }   
 });
 
@@ -607,7 +601,7 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
     ]);
     
     if(!$validator->isValid($data)){
-         $server->sendMessage($clientUid, json_encode(['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]));        
+         $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
     
@@ -622,12 +616,12 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
             continue;
         }
         
-        $server->sendMessage($participantUid, json_encode([
+        $server->send($participantUid, [
             'action'=>'operatorAddMessageToChat', 
             'chatUid'=>$data['chatUid'], 
             'operatorUid'=> $clientUid,
             'message'=>$data['message'],
-        ]));   
+        ]);   
     }
     
     foreach (ServerLogic::getOperators() as $operatorUid => $operator) {
@@ -635,12 +629,12 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
             continue;
         }
         
-        $server->sendMessage($operatorUid, json_encode([
+        $server->send($operatorUid, [
             'action'=>'operatorAddMessageToChat', 
             'chatUid'=>$data['chatUid'], 
             'operatorUid'=> $clientUid,
             'message'=>$data['message'],
-        ]));   
+        ]);   
     }
 });
 
