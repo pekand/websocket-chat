@@ -52,7 +52,7 @@ class Validator
 					}
 					
 					if($rule == 'length' && isset($ruleValue['min']) && strlen($value)<$ruleValue['min']) {
-						$this->errors[$key][] = 'lenght is smaller then '.$ruleParams['min'];
+						$this->errors[$key][] = 'lenght is smaller then '.$ruleValue['min'];
 					}
 					
 					if($rule == 'length' && isset($ruleValue['max']) && $ruleValue['max']<strlen($value)) {

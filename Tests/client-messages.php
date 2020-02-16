@@ -98,6 +98,7 @@ $client2->addListener(function ($client, $request) {
        echo "C2: Server return clientUid: ".$data['uid']."\n"; 
        $state['client2']['uid'] = $data['uid'];
     }
+
     
     if($data['action'] == 'operatorBroadcastMessage') { 
         echo "C2 operator (".$data['operator']."): broadcast message: ".$data['message']."\n";
@@ -271,7 +272,7 @@ $operator2->addListener(function ($client, $request) {
 $pool = new WebSocketPool();
 
 /* ACTIONS */
-$pool->addAction(1000000, function(){
+$pool->addAction(['delay'=>1000000], function(){
     echo "Action: Client1 send message to self and client2 \n";
     
     global $state;
@@ -281,76 +282,90 @@ $pool->addAction(1000000, function(){
 
     //$client->send(['action'=>'shutdown']);
   
-   $client1->send([
-    'action'=>'sendMessage',
-    'to'=>$state['client1']['uid'],
-    'message'=>"Mesage from client1 to client1"
-   ]);      
+    if(isset($state['client1']['uid'])){
+       $client1->send([
+        'action'=>'sendMessage',
+        'to'=>$state['client1']['uid'],
+        'message'=>"Mesage from client1 to client1"
+       ]); 
+    }     
    
-   $client1->send([
-    'action'=>'sendMessage', 
-    'to'=> $state['client2']['uid'],
-    'message'=>"Mesage from client1 to client2"
-    ]); 
+    if(isset($state['client2']['uid'])){
+        $client1->send([
+            'action'=>'sendMessage', 
+            'to'=> $state['client2']['uid'],
+            'message'=>"Mesage from client1 to client2"
+        ]); 
+    }
    
    $longMessage1 = "";
    for($i=0; $i<125-3;$i++){
      $longMessage1 .= "O";
    }
    
-   $client1->send([
-    'action'=>'sendMessage', 
-    'to'=> $state['client2']['uid'],
-    'message'=>"L".$longMessage1."NG"
-    ]); 
+   if(isset($state['client2']['uid'])){
+        $client1->send([
+            'action'=>'sendMessage', 
+            'to'=> $state['client2']['uid'],
+            'message'=>"L".$longMessage1."NG"
+        ]); 
+    }
    
    $longMessage2 = "";
    for($i=0; $i<126-3;$i++){
      $longMessage2 .= "O";
    }
    
-   $client1->send([
-    'action'=>'sendMessage', 
-    'to'=> $state['client2']['uid'],
-    'message'=>"L".$longMessage2."NG"
-    ]); 
+   if(isset($state['client2']['uid'])){
+       $client1->send([
+            'action'=>'sendMessage', 
+            'to'=> $state['client2']['uid'],
+            'message'=>"L".$longMessage2."NG"
+        ]); 
+    }
    
    $longMessage3 = "";
    for($i=0; $i<127-3;$i++){
      $longMessage3 .= "O";
    }
    
-   $client1->send([
-    'action'=>'sendMessage', 
-    'to'=> $state['client2']['uid'],
-    'message'=>"L".$longMessage3."NG"
-    ]); 
+   if(isset($state['client2']['uid'])){
+        $client1->send([
+            'action'=>'sendMessage', 
+            'to'=> $state['client2']['uid'],
+            'message'=>"L".$longMessage3."NG"
+        ]); 
+    }
    
    $longMessage4 = "";
    for($i=0; $i<2**16-3;$i++){
      $longMessage4 .= "O";
    }
    
-   $client1->send([
-    'action'=>'sendMessage', 
-    'to'=> $state['client2']['uid'],
-    'message'=>"L".$longMessage4."NG"
-    ]); 
+   if(isset($state['client2']['uid'])){
+       $client1->send([
+        'action'=>'sendMessage', 
+        'to'=> $state['client2']['uid'],
+        'message'=>"L".$longMessage4."NG"
+        ]); 
+   }
    
    $longMessage5 = "";
    for($i=0; $i<2**17-3;$i++){
      $longMessage5 .= "O";
    }
    
-   $client1->send([
-    'action'=>'sendMessage', 
-    'to'=> $state['client2']['uid'],
-    'message'=>"L".$longMessage5."NG"
-    ]); 
+    if(isset($state['client2']['uid'])){
+        $client1->send([
+            'action'=>'sendMessage', 
+            'to'=> $state['client2']['uid'],
+            'message'=>"L".$longMessage5."NG"
+        ]); 
+    }
    
 });
 
-$pool->addAction(2000000, function(){
+$pool->addAction(['delay'=>2000000], function(){
     echo "Action: Client1 invalid login as operator \n";
     
     global $state;
@@ -365,7 +380,7 @@ $pool->addAction(2000000, function(){
   
 });
 
-$pool->addAction(3000000, function(){
+$pool->addAction(['delay'=>3000000], function(){
     echo "Action: Client1 login and logout as operator \n";
     
     global $state;
@@ -375,7 +390,7 @@ $pool->addAction(3000000, function(){
     $client1->send(['action'=>'logout']);
 });
 
-$pool->addAction(4000000, function(){
+$pool->addAction(['delay'=>4000000], function(){
     echo "Action: Client1 check if operator is still logged \n";
     
     global $state;
@@ -384,7 +399,7 @@ $pool->addAction(4000000, function(){
     $client1->send(['action'=>'isOperatorLogged']);
 });
 
-$pool->addAction(5000000, function(){
+$pool->addAction(['delay'=>5000000], function(){
     echo "Action: Client2 send mesage to all operators\n";
     
     global $state;
@@ -398,7 +413,7 @@ $pool->addAction(5000000, function(){
     
 });
 
-$pool->addAction(6000000, function(){
+$pool->addAction(['delay'=>6000000], function(){
     echo "Action: operator1 login\n";
     
     global $state;
@@ -407,7 +422,7 @@ $pool->addAction(6000000, function(){
     $operator1->send(['action'=>'login','username'=>'admin', 'password'=>'password']);
 });
 
-$pool->addAction(7000000, function(){
+$pool->addAction(['delay'=>7000000], function(){
     echo "Action: operator1 get opened clients\n";
     
     global $state;
@@ -416,7 +431,7 @@ $pool->addAction(7000000, function(){
     $operator1->send(['action'=>'getClients']);
 });
 
-$pool->addAction(8000000, function(){
+$pool->addAction(['delay'=>8000000], function(){
     echo "Action: Operator1 broadcast message to all clients\n";
     
     global $state;
@@ -425,20 +440,22 @@ $pool->addAction(8000000, function(){
     $operator1->send(['action'=>'broadcast', "message"=>"Mesage from operator1 to all clients"]);
 });
 
-$pool->addAction(9000000, function(){
+$pool->addAction(['delay'=>9000000], function(){
     echo "Action: operator1 send message to client1 \n";
     
     global $state;
     global $operator1;
        
-    $operator1->send([
-        'action'=>'sendMessage', 
-        'to'=> $state['client1']['uid'],
-        'message'=>"Mesage from operator1 to client1"
-    ]);
+    if(isset($state['client1']['uid'])){
+        $operator1->send([
+            'action'=>'sendMessage', 
+            'to'=> $state['client1']['uid'],
+            'message'=>"Mesage from operator1 to client1"
+        ]);
+    }
 });
 
-$pool->addAction(10000000, function(){
+$pool->addAction(['delay'=>10000000], function(){
     echo "Action: Client2 close connection\n";
     
     global $state;
@@ -449,22 +466,23 @@ $pool->addAction(10000000, function(){
     
 });
 
-$pool->addAction(11000000, function(){
+$pool->addAction(['delay'=>11000000], function(){
     echo "Action: Closed client2 send messge to client1\n";
     
     global $state;
     global $client2;
     
-    
-    $client2->send([
-        'action'=>'sendMessage', 
-        'to'=> $state['client1']['uid'],
-        'message'=>"Mesage from client2 to client1"
-    ]);
+    if(isset($state['client1']['uid'])){  
+        $client2->send([
+            'action'=>'sendMessage', 
+            'to'=> $state['client1']['uid'],
+            'message'=>"Mesage from client2 to client1"
+        ]);
+    }
     
 });
 
-$pool->addAction(12000000, function(){
+$pool->addAction(['delay'=>12000000], function(){
     echo "Action: Operator2 login\n";
     
     global $state;
@@ -473,7 +491,7 @@ $pool->addAction(12000000, function(){
     $operator2->send(['action'=>'login','username'=>'admin', 'password'=>'password']);
 });
 
-$pool->addAction(13000000, function(){    
+$pool->addAction(['delay'=>13000000], function(){    
     echo "Action: CLose all operators\n";
     global $operator1;
     global $operator2;
@@ -483,7 +501,7 @@ $pool->addAction(13000000, function(){
     
 });
 
-$pool->addAction(14000000, function(){    
+$pool->addAction(['delay'=>14000000], function(){    
     echo "Action: CLose all clients\n";
     global $client1;
     global $client3;
@@ -493,7 +511,6 @@ $pool->addAction(14000000, function(){
     
 });
 
-  
 $pool->listen([
     $client1, $client2, $operator1,
     $client4, $client3, $operator2

@@ -385,11 +385,6 @@ $pool->addAction(['delay'=>14000000], function(){
         'action'=>'close'
     ]);
 });
-
-$pool->addAction(['delay'=>15000000, 'repeat'=> 1000000], function(){
-    echo "repeat test\n";    
-});
-
   
 $pool->listen([
     $client1, $client2, $operator1, $operator2

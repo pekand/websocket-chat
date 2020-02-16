@@ -9,13 +9,13 @@ spl_autoload_register(function ($class_name) {
 use WebSocketServer\WebSocketServer;
 use Logic\Log;
 use Logic\ChatsStorage;
-use Logic\ServerLogic;
+use Logic\Services;
 use Logic\Validator;
 
 define("ROOT", dirname(__FILE__));
 define("STORAGE", ROOT.DIRECTORY_SEPARATOR.'storage');
 
-ServerLogic::init();
+Services::init();
 
 Log::setAllowdSeverity([
     'INFO', 
@@ -43,7 +43,8 @@ $server->afterShutdown(function($server) {
 
 $server->clientConnected(function($server, $clientUid) {
     Log::write("({$clientUid}) CLIENT CONNECTED");
-    ServerLogic::addClient($clientUid);      
+    $userStorage = Services::getUsersStorage();
+    $userStorage->addClient($clientUid);      
     return true;
 });
 
@@ -151,9 +152,10 @@ $server->addAction('close', function($server, $clientUid, $data){
          return;  
     }
     
-    $chatStorage = ServerLogic::getChatStorage();
+    $chatStorage = Services::getChatStorage();
+    $userStorage = Services::getUsersStorage();
     
-    if(ServerLogic::isOperator($clientUid)){
+    if($userStorage->isOperator($clientUid)){
         
         $chatsWithoutOperator = $chatStorage->removeOperatorFromAllChats($clientUid);
         
@@ -166,21 +168,21 @@ $server->addAction('close', function($server, $clientUid, $data){
             }
         }
     
-        ServerLogic::removeOperator($clientUid);
-        ServerLogic::removeClient($clientUid);
+        $userStorage->removeOperator($clientUid);
+        $userStorage->removeClient($clientUid);
         
-        if(count(ServerLogic::getOperators()) == 0 && count(ServerLogic::getClients()) > 0){
-            foreach (ServerLogic::getClients() as $uid => $value) { 
+        if(count($userStorage->getOperators()) == 0 && count($userStorage->getClients()) > 0){
+            foreach ($userStorage->getClients() as $uid => $value) { 
                 Log::write("({$clientUid}) All operators disconected, notification to client {$uid}");
                 $server->send($uid , ['action'=>'operatorsDisconected']); 
             }
         }
-    } else if(ServerLogic::isClient($clientUid)) {
+    } else if($userStorage->isClient($clientUid)) {
         
         $chatsWithoutClients = $chatStorage->removeClientFromAllChats($clientUid);
         if(count($chatsWithoutClients) > 0) {
             foreach ($chatsWithoutClients as $chatUid) {
-                foreach (ServerLogic::getOperators() as $operatorUid => $operator) { 
+                foreach ($userStorage->getOperators() as $operatorUid => $operator) { 
                     Log::write("({$clientUid}) All clients disconected from chat {$chatUid}");
                     $server->send($operatorUid , ['action'=>'allClientsDisconectedFromChat', 'chatUid'=>$chatUid]); 
                     
@@ -191,10 +193,10 @@ $server->addAction('close', function($server, $clientUid, $data){
             }
         }
     
-        ServerLogic::removeClient($clientUid);
+       $userStorage->removeClient($clientUid);
         
-        if(count(ServerLogic::getOperators()) > 0){
-            foreach (ServerLogic::getOperators() as $uid => $value) { 
+        if(count($userStorage->getOperators()) > 0){
+            foreach ($userStorage->getOperators() as $uid => $value) { 
                 Log::write("({$clientUid}) Client disconected notification to operator {$uid}");
                 $server->send($uid , ['action'=>'clientDisconected', 'clientUid'=> $clientUid]); 
             }
@@ -219,28 +221,28 @@ $server->addAction('login', function($server, $clientUid, $data){
          return;  
     }
     
-    $userStorage = ServerLogic::getUsersStorage();
+    $userStorage = Services::getUsersStorage();
 
-    if($userStorage->isValidUser($data['username'], $data['password'])) { 
+    if($userStorage->isValidOperator($data['username'], $data['password'])) { 
         Log::write("({$clientUid}) Operator accepted");
             
         $noActiveOperator = true;
-        if(count(ServerLogic::getOperators()) > 0){
+        if(count($userStorage->getOperators()) > 0){
             $noActiveOperator = false;
         }
         
-        ServerLogic::addOperator($clientUid);  
+        $userStorage->addOperator($clientUid);  
         
-        $chatStorage = ServerLogic::getChatStorage();
+        $chatStorage = Services::getChatStorage();
         $chatStorage->addOperatorToAllChats($clientUid);
         
         $server->send($clientUid, [
             'action'=>'loginSuccess',
-            'token'=> ServerLogic::getToken()
+            'token'=> $userStorage->getToken()
         ]); 
           
         if($noActiveOperator){
-            foreach (ServerLogic::getClients() as $uid => $value) { 
+            foreach ($userStorage->getClients() as $uid => $value) { 
                 Log::write("({$clientUid}) Operator login notification {$uid}");
                 $server->send($uid , [
                     'action'=>'operatorConnected', 
@@ -268,17 +270,19 @@ $server->addAction('loginWithToken', function($server, $clientUid, $data){
          return;  
     }
     
-    if(ServerLogic::isValidToken($data['token'])) { 
+    $userStorage = Services::getUsersStorage();
+    
+    if($userStorage->isValidToken($data['token'])) { 
         Log::write("({$clientUid}) Operator accepted by token");
             
         $noActiveOperator = true;
-        if(count(ServerLogic::getOperators()) > 0){
+        if(count($userStorage->getOperators()) > 0){
             $noActiveOperator = false;
         }
         
-        ServerLogic::addOperator($clientUid);  
+        $userStorage->addOperator($clientUid);  
         
-        $chatStorage = ServerLogic::getChatStorage();
+        $chatStorage = Services::getChatStorage();
         $chatStorage->addOperatorToAllChats($clientUid);
         
         $server->send($clientUid, [
@@ -286,7 +290,7 @@ $server->addAction('loginWithToken', function($server, $clientUid, $data){
         ]); 
           
         if($noActiveOperator){
-            foreach (ServerLogic::getClients() as $uid => $value) { 
+            foreach ($userStorage->getClients() as $uid => $value) { 
                 Log::write("({$clientUid}) Operator login notification {$uid}");
                 $server->send($uid , [
                     'action'=>'operatorConnected', 
@@ -315,13 +319,15 @@ $server->addAction('logout', function($server, $clientUid, $data){
          return;  
     }
     
-    if(ServerLogic::isOperator($clientUid)) { 
+    $userStorage = Services::getUsersStorage();
+    
+    if($userStorage->isOperator($clientUid)) { 
         Log::write("({$clientUid}) Operator logout operator");
-        ServerLogic::removeOperator($clientUid);
+        $userStorage->removeOperator($clientUid);
         
         $server->send($clientUid, ['action'=>'logoutSuccess']); 
         
-        foreach (ServerLogic::getOperators() as $operatorUid => $value) { 
+        foreach ($userStorage->getOperators() as $operatorUid => $value) { 
             Log::write("({$clientUid}) Operator logout {$operatorUid}");
             $server->send($operatorUid , ['action'=>'operatorLogout', 'operator'=> $clientUid]); 
         } 
@@ -344,7 +350,9 @@ $server->addAction('isOperatorLogged', function($server, $clientUid, $data){
          return;  
     }
     
-    if(count(ServerLogic::getOperators()) == 0) {
+    $userStorage = Services::getUsersStorage();
+    
+    if(count($userStorage->getOperators()) == 0) {
         $server->send($clientUid , ['action'=>'operatorConnected']); 
     } else {
         $server->send($clientUid , ['action'=>'operatorsDisconected']);
@@ -389,7 +397,9 @@ $server->addAction('sendMessageToOperator', function($server, $clientUid, $data)
          return;  
     }
     
-    foreach (ServerLogic::getOperators() as $operatorUid => $value) { 
+    $userStorage = Services::getUsersStorage();
+    
+    foreach ($userStorage->getOperators() as $operatorUid => $value) { 
         Log::write("({$clientUid}) Client Send Message To Operator {$operatorUid}: {$data['message']}");
         $server->send($operatorUid , ['action'=>'messageFromClient', 'from'=> $clientUid, 'message'=>$data['message']]); 
     }  
@@ -408,9 +418,11 @@ $server->addAction('getClients', function($server, $clientUid, $data){
          return;  
     }
     
-    if(ServerLogic::isOperator($clientUid)) {
+    $userStorage = Services::getUsersStorage();
+    
+    if($userStorage->isOperator($clientUid)) {
         $clients = [];
-        foreach (ServerLogic::getClients() as $uid => $value) { 
+        foreach ($userStorage->getClients() as $uid => $value) { 
             $clients[] = $uid;
         }
         $server->send($clientUid, ['action'=>'clients', 'clients'=>$clients]);   
@@ -433,10 +445,11 @@ $server->addAction('broadcast', function($server, $clientUid, $data){
          $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
+    $userStorage = Services::getUsersStorage();
     
-    if(ServerLogic::isOperator($clientUid) && isset($data['message'])) { 
+    if($userStorage->isOperator($clientUid) && isset($data['message'])) { 
         Log::write("({$clientUid}) Operator broadcast");
-        foreach (ServerLogic::getClients() as $uid => $value) {                
+        foreach ($userStorage->getClients() as $uid => $value) {                
             Log::write("({$clientUid}) Addmin broadcast to {$uid}: {$data['message']}");
             $server->send($uid, ['action'=>'operatorBroadcastMessage', 'operator'=>$clientUid, 'message'=>$data['message']]); 
         }
@@ -463,7 +476,7 @@ $server->addAction('openChat', function($server, $clientUid, $data){
          return;  
     }
     
-    $chatStorage = ServerLogic::getChatStorage();
+    $chatStorage = Services::getChatStorage();
         
     $isChatAllreadyOpen = false;
     if($data['chatUid'] != '' && $chatStorage->isChatOpen($data['chatUid'])){
@@ -472,8 +485,10 @@ $server->addAction('openChat', function($server, $clientUid, $data){
     
     $chatUid = $chatStorage->openChat($data['chatUid']);
  
+    $userStorage = Services::getUsersStorage();
+ 
     if(!$isChatAllreadyOpen) {
-        foreach (ServerLogic::getOperators() as $operatorUid => $value) { 
+        foreach ($userStorage->getOperators() as $operatorUid => $value) { 
             Log::write("({$clientUid}) Client open chat {$chatUid}");
             $server->send($operatorUid , [
                 'action'=>'chatOpen', 
@@ -489,7 +504,7 @@ $server->addAction('openChat', function($server, $clientUid, $data){
         $server->send($clientUid, [
             'action'=>'chatUid', 
             'chatUid'=> $chatUid,
-            'operatorStatus' => count(ServerLogic::getOperators()) > 0 ? 'online' :'offline',
+            'operatorStatus' => count($userStorage->getOperators()) > 0 ? 'online' :'offline',
             'chatHistory' => $chatStorage->getChatHistory($chatUid)
         ]);
     }
@@ -507,9 +522,11 @@ $server->addAction('getAllOpenChats', function($server, $clientUid, $data){
          $server->send($clientUid, ['action'=>'invalidRequest', 'errors'=>$validator->getErrors()]);        
          return;  
     }
+    
+    $userStorage = Services::getUsersStorage();
      
-    if(ServerLogic::isOperator($clientUid)) {
-        $chatStorage = ServerLogic::getChatStorage();
+    if($userStorage->isOperator($clientUid)) {
+        $chatStorage = Services::getChatStorage();
         $chatStorage->addOperatorToAllChats($clientUid);
         $server->send($clientUid, ['action'=>'allOpenChats', 'chats'=>$chatStorage->getChats()]);               
     }  else {
@@ -532,7 +549,7 @@ $server->addAction('getChatHistory', function($server, $clientUid, $data) {
          return;  
     }
     
-    $chatStorage = ServerLogic::getChatStorage();
+    $chatStorage = Services::getChatStorage();
     $chatHsitory = $chatStorage->getChatHistory($data['chatUid']);
     
     $server->send($clientUid, [
@@ -557,7 +574,7 @@ $server->addAction('addClientMessageToChat', function($server, $clientUid, $data
          return;  
     }
     
-    $chatStorage = ServerLogic::getChatStorage();        
+    $chatStorage = Services::getChatStorage();        
     $chatStorage->addClientMessage($data['chatUid'], $clientUid, $data['message']);
     $chatStorage->saveChat($data['chatUid']);     
     
@@ -575,8 +592,9 @@ $server->addAction('addClientMessageToChat', function($server, $clientUid, $data
             'message'=>$data['message'],
         ]);   
     }   
+    $userStorage = Services::getUsersStorage();
     
-    foreach (ServerLogic::getOperators() as $operatorUid => $operator) {
+    foreach ($userStorage->getOperators() as $operatorUid => $operator) {
         if($operatorUid == $clientUid) {
             continue;
         }
@@ -605,7 +623,7 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
          return;  
     }
     
-    $chatStorage = ServerLogic::getChatStorage();  
+    $chatStorage = Services::getChatStorage();  
     $chatStorage->addOperatorMessage($data['chatUid'], $clientUid, $data['message']);
     $chatStorage->saveChat($data['chatUid']); 
     
@@ -623,8 +641,9 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
             'message'=>$data['message'],
         ]);   
     }
+    $userStorage = Services::getUsersStorage();
     
-    foreach (ServerLogic::getOperators() as $operatorUid => $operator) {
+    foreach ($userStorage->getOperators() as $operatorUid => $operator) {
         if($operatorUid == $clientUid) {
             continue;
         }
@@ -639,7 +658,8 @@ $server->addAction('addOperatorMessageToChat', function($server, $clientUid, $da
 });
 
 $server->addWorker(['delay'=>10.0, 'repeat'=>60.0], function($server){
-    Log::write("Worker informations: ".json_encode(ServerLogic::getInfo()));   
+    $userStorage = Services::getUsersStorage();    
+    Log::write("Worker informations: ".json_encode($userStorage->getInfo()));   
 });
 
 

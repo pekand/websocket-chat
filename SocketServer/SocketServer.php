@@ -21,7 +21,7 @@ class SocketServer {
     private $socket = null;
     private $listeners = [];
     private $clients = [];
-    private $worker = [];
+    private $workers = [];
 
     public function __construct($options = []) {
         

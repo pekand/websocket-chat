@@ -29,7 +29,7 @@ function loginBox(loginBoxId){return {
     sendLoginClick: function() {
         var username = this.usernameInput.value.trim();
         var password = this.paswordInput.value;
-               
+                      
         for (var listener of this.loginClickListeners) {
             if (listener && typeof(listener) === "function") {
                 listener(username, password, this);
@@ -47,14 +47,17 @@ function loginBox(loginBoxId){return {
     
     shake:function (){
         
-        this.usernameInput.value = '';
         this.paswordInput.value = '';
-        this.usernameInput.focus();
+        this.paswordInput.focus();
+        
+        var handler = function(e) {
+          this.loginBox.classList.remove("login--shake");
+          this.loginBox.removeEventListener("webkitAnimationEnd", handler, false); 
+        }.bind(this);
+        
+        this.loginBox.addEventListener("webkitAnimationEnd", handler, false); 
         
         this.loginBox.classList.add("login--shake");
-        this.loginBox.addEventListener("webkitAnimationEnd", function(){
-            this.loginBox.classList.remove("login--shake");    
-        }.bind(this), false);
     },
     
     el: function(html) {

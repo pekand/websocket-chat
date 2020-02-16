@@ -18,8 +18,19 @@ var app = {
         this.loginPage = document.getElementById('login-page');
         this.chatsPage = document.getElementById('chats-page');
         this.loginBox = loginBox('login');
+        this.toolbar = toolbar('toolbar');
+        this.toolbar.addButton('logout', this.logoutClick.bind(this), []);
+        this.toolbar.addButton('shutdown', this.shutdownClick.bind(this), []);
     },
 
+    logoutClick: function(){
+        this.connection.sendMessage({action:'logout'});                 
+    },
+    
+    shutdownClick: function(){
+        this.connection.sendMessage({action:'shutdown'});                 
+    },
+    
     bindEvents: function() {
         this.loginBox.addLoginClickListener(this.loginToChat.bind(this))
         this.connection.addAfterConnectionListener(this.connectionCreated.bind(this));
@@ -27,7 +38,11 @@ var app = {
     },
     
     loginToChat: function(username, password) {
-        this.connection.sendMessage({action:'login', username: username, password: password});
+        if(username.length>0 && password.length>0) {
+            this.connection.sendMessage({action:'login', username: username, password: password});
+        } else {
+            this.loginBox.shake();
+        }
     },
     
     connectionCreated: function() {       
@@ -55,6 +70,11 @@ var app = {
             this.connection.sendMessage({action:'getAllOpenChats'});
         }
         
+        if(data.action == "logoutSuccess"){
+            localStorage.removeItem('operatorToken');
+            this.showLoginPage();
+        }
+
         if(data.action == "loginFailed"){
             this.loginBox.shake();
         }

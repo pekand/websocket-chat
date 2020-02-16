@@ -2,8 +2,14 @@
 	font-family:sans-serif;
 }
 
-body {
-    background: rgb(2,0,36);
+body, html{
+    margin:0;
+    padding:0; 
+    height: 100%;
+    background-color: black;   
+}
+
+.background {
     background: linear-gradient(90deg, rgba(22,121,9,0.8491771708683473) 0%, rgba(2,87,15,1) 0%, rgba(19,135,46,1) 3%, rgba(0,212,255,1) 100%);
 }
 
