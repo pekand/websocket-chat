@@ -1,0 +1,26 @@
+{
+    "name": "vendor/package",
+    "description": "Description",
+    "type": "project",
+    "homepage": "https://www.pekand.com",
+    "require": {
+        "pekand/log": "^1.0",
+        "pekand/socketserver": "^1.0",
+        "pekand/websocketserver": "^1.0"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "psr-4": {
+            "pekand\\": "pekand/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "pekand",
+            "email": "pekand@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable"
+}

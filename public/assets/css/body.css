@@ -1,0 +1,23 @@
+* {
+	font-family:sans-serif;
+}
+
+body, html{
+    margin:0;
+    padding:0; 
+    height: 100%;
+    background-color: white;   
+}
+
+.background {
+    background: #d4d67a;
+}
+
+.hide {
+	display: none;
+}
+
+.page{
+	display: none;
+}
+ 

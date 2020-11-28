@@ -1,7 +1,7 @@
 <?php
 
-use WebSocketServer\WebsocketClient;
-use WebSocketServer\WebSocketPool;
+use pekand\WebSocketServer\WebsocketClient;
+use pekand\WebSocketServer\WebSocketPool;
 
 $client1 = new WebsocketClient();
 $client2 = new WebsocketClient();
@@ -54,7 +54,7 @@ $client1->addListener(function ($client, $request) {
     }
     
     if($data['action'] == 'accessDenied') { 
-        echo "C1 Accessdenied to opperation: ".$data['forbidden']."\n";
+        echo "C1 Accessdenied to opperation: ".print_r($data['errors'], true)."\n";
     }
     
     if($data['action'] == 'operatorBroadcastMessage') { 

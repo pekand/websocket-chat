@@ -1,0 +1,23 @@
+.chatbox {
+    position: fixed;
+    bottom: 0px;
+    right: 10px;
+    z-index: 999;
+}
+
+
+
+.chatbox-closed {
+    display: block;
+}
+
+.chatbox-closed .chatbox__messages {
+    display: none;
+}
+
+.chatbox-closed .chatbox__footer {
+    display: none;
+}
+
+
+

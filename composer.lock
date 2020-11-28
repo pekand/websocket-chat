@@ -1,0 +1,142 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "14aeb65edd021fb042d20532e92b6977",
+    "packages": [
+        {
+            "name": "pekand/log",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pekand/log.git",
+                "reference": "0663955684e0ea3d96ac4b9bb893ae9c3cc002ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pekand/log/zipball/0663955684e0ea3d96ac4b9bb893ae9c3cc002ef",
+                "reference": "0663955684e0ea3d96ac4b9bb893ae9c3cc002ef",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "pekand\\Log\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "pekand <pekand@gmail.com>",
+                    "email": "pekand@gmail.com",
+                    "homepage": "https://www.pekand.com"
+                }
+            ],
+            "description": "log",
+            "homepage": "https://www.pekand.com",
+            "keywords": [
+                "websocketserver"
+            ],
+            "time": "2020-11-27T16:10:52+00:00"
+        },
+        {
+            "name": "pekand/socketserver",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pekand/socketserver.git",
+                "reference": "a084ba8f282dbab0624a08ab60400bb3bd89821a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pekand/socketserver/zipball/a084ba8f282dbab0624a08ab60400bb3bd89821a",
+                "reference": "a084ba8f282dbab0624a08ab60400bb3bd89821a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "pekand\\SocketServer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "pekand <pekand@gmail.com>",
+                    "email": "pekand@gmail.com",
+                    "homepage": "https://www.pekand.com"
+                }
+            ],
+            "description": "socket server",
+            "homepage": "https://www.pekand.com",
+            "keywords": [
+                "socketserver"
+            ],
+            "time": "2020-11-19T16:17:38+00:00"
+        },
+        {
+            "name": "pekand/websocketserver",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/pekand/websocketserver.git",
+                "reference": "3b320aa88d159b0a8f1397b26534278904398f66"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/pekand/websocketserver/zipball/3b320aa88d159b0a8f1397b26534278904398f66",
+                "reference": "3b320aa88d159b0a8f1397b26534278904398f66",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "pekand\\WebSocketServer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "pekand <pekand@gmail.com>",
+                    "email": "pekand@gmail.com",
+                    "homepage": "https://www.pekand.com"
+                }
+            ],
+            "description": "websocket server",
+            "homepage": "https://www.pekand.com",
+            "keywords": [
+                "websocketserver"
+            ],
+            "time": "2020-11-19T16:23:06+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "1.1.0"
+}

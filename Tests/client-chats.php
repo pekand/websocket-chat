@@ -1,7 +1,7 @@
 <?php
 
-use WebSocketServer\WebSocketClient;
-use WebSocketServer\WebSocketPool;
+use pekand\WebSocketServer\WebSocketClient;
+use pekand\WebSocketServer\WebSocketPool;
 
 $client1 = new WebSocketClient();
 $client2 = new WebSocketClient();
